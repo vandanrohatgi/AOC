@@ -1,7 +1,10 @@
 package main
 
 import (
+	"bufio"
+	"bytes"
 	"fmt"
+	"io"
 	"log"
 	"os"
 )
@@ -10,8 +13,8 @@ type stack struct {
 	items []rune
 }
 
-func (s *stack) push(i rune) {
-	s.items = append(s.items, i)
+func (s *stack) push(i ...rune) {
+	s.items = append(s.items, i...)
 }
 
 func (s *stack) pop(amount int) []rune {
@@ -35,6 +38,12 @@ func (s *stack) peep() rune {
 	return s.items[length-1]
 }
 
+func (s *stack) printStack() {
+	for _, i := range s.items {
+		fmt.Println(string(i))
+	}
+}
+
 func reverseStack(final []rune) []rune {
 	for i, j := 0, len(final)-1; i < j; i, j = i+1, j-1 {
 		final[i], final[j] = final[j], final[i]
@@ -44,7 +53,7 @@ func reverseStack(final []rune) []rune {
 }
 
 func sol1() {
-	f, err := os.Open("test.txt")
+	f, err := os.Open("input.txt")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -55,48 +64,44 @@ func sol1() {
 	for {
 		_, err := f.Read(buffer)
 		if err != nil {
-			log.Fatal(err)
-		}
-		if string(buffer[0]) == "\n" {
+			log.Print(err)
 			break
 		}
-		if string(buffer[3]) == "\n" {
-			stackNum = 0
+		if rune(buffer[0]) == '\n' {
+			break // reached end of stack definition
 		}
 		char := rune(buffer[1])
-		if char <= 90 && char >= 65 {
+		if char >= 65 && char <= 90 {
 			stacks[stackNum].items = append(stacks[stackNum].items, char)
 		}
 		stackNum += 1
+		if rune(buffer[3]) == '\n' {
+			stackNum = 0 // if the last char is a new line, start filling from 1st stack again
+		}
+
 	}
-	// sc := bufio.NewScanner(f)
-	// sc := bufio.NewReader(f)
-	// sc.Split(bufio.ScanLines)
-	// for sc.Scan() && sc.Text() != "" {
-	// fmt.Println(sc.
-	// }
-	//    var previousRune rune
-	//    var spaceCount int
-	// for {
-	// 	if c, _, err := sc.ReadRune(); err != nil {
-	// 		if err == io.EOF {
-	// 			break
-	// 		} else {
-	// 			log.Fatal(err)
-	// 		}
-	// 	} else {
-	//            if previousRune==c && c=='\n'{
-	//                break
-	//            }
-	//            previousRune=c
-	//            if c==' '{
-	//                spaceCount+=1
-	//            }
-	//            if c>=65 && c<=90{
-	//                if spaceCount == 1
-	//            }
-	// 		fmt.Printf("%s", string(c))
-	// 	}
-	// }
-	fmt.Print(stacks)
+	for i := range stacks {
+		stacks[i].items = reverseStack(stacks[i].items)
+	}
+
+	// fix the first three bytes that the previous step consumed
+	var invalidbuffer []byte
+	invalidbuffer = []byte("mov")
+	remaining, err := io.ReadAll(f)
+	if err != nil {
+		log.Fatal(err)
+	}
+	invalidbuffer = append(invalidbuffer, remaining...)
+	//loop over each line and extract quantities and locations
+	sc := bufio.NewScanner(bytes.NewReader(invalidbuffer))
+	for sc.Scan() {
+		var to, from, amount int
+		// fmt.Println(sc.Text())
+		fmt.Sscanf(sc.Text(), "move %d from %d to %d", &amount, &from, &to)
+		// fmt.Println(to, from, amount)
+		stacks[to-1].push(stacks[from-1].pop(amount)...)
+	}
+	for _, i := range stacks {
+		fmt.Print(string(i.peep()))
+	}
 }
