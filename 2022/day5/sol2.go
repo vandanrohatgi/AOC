@@ -9,7 +9,20 @@ import (
 	"os"
 )
 
-func sol1() {
+func (s *Stack) pop2(amount int) []rune {
+	length := len(s.items)
+	if length == 0 {
+		return []rune{}
+	}
+	final := s.items[length-amount:]
+	// if amount != 1 {
+	// 	final = reverseStack(final)
+	// }
+	s.items = s.items[:length-amount]
+	return final
+}
+
+func sol2() {
 	f, err := os.Open("input.txt")
 	if err != nil {
 		log.Fatal(err)
@@ -54,7 +67,7 @@ func sol1() {
 	for sc.Scan() {
 		var to, from, amount int
 		fmt.Sscanf(sc.Text(), "move %d from %d to %d", &amount, &from, &to)
-		stacks[to-1].push(stacks[from-1].pop(amount)...)
+		stacks[to-1].push(stacks[from-1].pop2(amount)...)
 	}
 	for _, i := range stacks {
 		fmt.Print(string(i.peep()))
