@@ -12,6 +12,8 @@ type fs struct {
 	fsTree map[string]*fs
 }
 
+var memSum int
+
 func sol1() {
 	f, err := os.Open("test.txt")
 	if err != nil {
@@ -21,22 +23,21 @@ func sol1() {
 	sc.Scan()
 	var fileDirectory = &fs{size: 0, fsTree: make(map[string]*fs)}
 	recurseDir(fileDirectory, sc)
-
+	traverseFs(fileDirectory)
+	fmt.Println(memSum)
 }
 
-func recurseDir(dir *fs, lines *bufio.Scanner) {
+func recurseDir(dir *fs, lines *bufio.Scanner) int {
 	for lines.Scan() {
-		fmt.Println(lines.Text())
 		switch lines.Text()[0] {
 		case '$':
 			var cmd, opts string
 			fmt.Sscanf(lines.Text(), "$ %s %s", &cmd, &opts)
-			// fmt.Println(cmd, opts)
 			if cmd == "cd" {
 				if opts != ".." {
-					recurseDir(dir.fsTree[opts], lines)
+					dir.size += recurseDir(dir.fsTree[opts], lines)
 				} else {
-					return
+					return dir.size
 				}
 			}
 		case 'd':
@@ -49,10 +50,15 @@ func recurseDir(dir *fs, lines *bufio.Scanner) {
 			dir.size += size
 		}
 	}
+	return dir.size
 }
 
 func traverseFs(dir *fs) {
-	for k, v := range fs.fsTree {
+	if dir.size <= 100000 {
+		memSum += dir.size
+	}
+	for _, v := range dir.fsTree {
 		traverseFs(v)
 	}
+	fmt.Println(dir)
 }
