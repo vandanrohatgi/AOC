@@ -6,7 +6,6 @@ import (
 	"log"
 	"os"
 	"strconv"
-	"strings"
 )
 
 func main() {
@@ -42,12 +41,6 @@ func coordinatesToString(x, y int) string {
 	return strconv.Itoa(x) + ":" + strconv.Itoa(y)
 }
 
-func coordinatesFromString(c string) (int, int) {
-	var x, y int
-	fmt.Fscanf(strings.NewReader(c), "%d:%d", &x, &y)
-	return x, y
-}
-
 func sol1(f []byte) {
 	houseMap := make(map[string]int)
 	var x, y int
@@ -73,5 +66,35 @@ func sol1(f []byte) {
 }
 
 func sol2(f []byte) {
+	houseMap := make(map[string]int)
+	var santa, robo = []int{0, 0}, []int{0, 0} // x,y coordinates
+	var turnPtr = &santa                       // start with santa in the lead
 
+	houseMap[coordinatesToString(santa[0], santa[1])] = 1 // starting house
+
+	for _, i := range f {
+		switch rune(i) {
+		case '^':
+			(*turnPtr)[1] += 1
+			houseMap[coordinatesToString((*turnPtr)[0], (*turnPtr)[1])] += 1
+		case 'v':
+			(*turnPtr)[1] -= 1
+			houseMap[coordinatesToString((*turnPtr)[0], (*turnPtr)[1])] += 1
+		case '<':
+			(*turnPtr)[0] -= 1
+			houseMap[coordinatesToString((*turnPtr)[0], (*turnPtr)[1])] += 1
+		case '>':
+			(*turnPtr)[0] += 1
+			houseMap[coordinatesToString((*turnPtr)[0], (*turnPtr)[1])] += 1
+		}
+
+		// change turns every character
+		if turnPtr == &santa {
+			turnPtr = &robo
+		} else {
+			turnPtr = &santa
+		}
+	}
+
+	fmt.Print(len(houseMap))
 }
