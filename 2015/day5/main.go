@@ -38,6 +38,7 @@ func main() {
 	}
 }
 
+// PART 1
 func passesAllChecks(s string) bool {
 	vowels := map[rune]interface{}{
 		'a': nil,
@@ -85,7 +86,33 @@ func sol1(f []byte) {
 	fmt.Println(niceStrings)
 }
 
+// PART 2
 func passesAllChecks2(s string) bool {
+	return hasDoubleLetters(s) && hasSingleLetter(s)
+}
+
+// a b c d e f
+// i=0, i+2 = 2
+// j=i+2=2, j+2=4
+func hasDoubleLetters(s string) bool {
+	for i := 0; i <= len(s)-4; i++ {
+		sub1 := s[i : i+2]
+		for j := i + 2; j <= len(s)-2; j++ {
+			sub2 := s[j : j+2]
+			if sub1 == sub2 {
+				return true
+			}
+		}
+	}
+	return false
+}
+
+func hasSingleLetter(s string) bool {
+	for i := 0; i < len(s)-2; i++ {
+		if s[i] == s[i+2] {
+			return true
+		}
+	}
 	return false
 }
 
