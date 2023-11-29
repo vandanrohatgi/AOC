@@ -1,14 +1,13 @@
 package main
 
 import (
-	"bufio"
 	"bytes"
 	"flag"
 	"fmt"
 	"log"
 	"os"
-	"regexp"
 	"strconv"
+	"strings"
 )
 
 func main() {
@@ -34,81 +33,56 @@ func main() {
 	}
 
 	if solution == 1 {
-		sol1(f)
+		sol1(bytes.TrimSpace(f))
 	} else {
-		sol2(f)
+		sol2(bytes.TrimSpace(f))
 	}
 }
 
-// keep in mind the example may not be the only psoobile pattern in the input
-// patterns of instructions
-var directOp = regexp.MustCompile(`^(\d+|\w+) -> (\w+)$`)
-var complementOp = regexp.MustCompile(`^NOT (\d+|\w+) -> (\w+)$`)
-var binaryOp = regexp.MustCompile(`^(\w+) (\w+) (\d+|\w+) -> (\w+)$`)
+var instructions = make(map[string][]string)
+var register = make(map[string]uint16)
 
 func sol1(f []byte) {
-	buf := bufio.NewScanner(bytes.NewReader(f))
-
-	var register = make(map[string]uint16) // uint becuase apparently the left most bit is for sign of the integer making negative numbers
-	for buf.Scan() {
-		if direct.MatchString(buf.Text()) {
-
-			directMatch := direct.FindStringSubmatch(buf.Text())
-			fmt.Println(directMatch)
-			var src interface{}
-			src, err := strconv.Atoi(directMatch[1])
-			dst := directMatch[2]
-			if err != nil {
-				register[dst] = register[src.(string)]
-			}
-			register[dst] = uint16(src.(int))
-
-		} else if complement.MatchString(buf.Text()) {
-
-			complimentMatch := complement.FindStringSubmatch(buf.Text())
-			fmt.Println(complimentMatch)
-			dst := complimentMatch[2]
-			src := complimentMatch[1]
-			register[dst] = ^register[src]
-
-		} else {
-            
-            
-
-			shiftMatch := shift.FindStringSubmatch(buf.Text())
-			fmt.Println(shiftMatch)
-			src := shiftMatch[1]
-			shiftType := shiftMatch[2]
-			shiftBy, err := strconv.Atoi(shiftMatch[3])
-			if err != nil {
-				log.Fatal(err)
-			}
-			dst := shiftMatch[4]
-
-			if shiftType == "LSHIFT" {
-				register[dst] = register[src] << shiftBy
-			} else {
-				register[dst] = register[src] >> shiftBy
-			}
-
-		} else if logic.MatchString(buf.Text()) {
-			logicMatch := logic.FindStringSubmatch(buf.Text())
-			fmt.Println(logicMatch)
-			src1 := logicMatch[1]
-			operator := logicMatch[2]
-			src2 := logicMatch[3]
-			dst := logicMatch[4]
-
-			if operator == "AND" {
-				register[dst] = register[src1] & register[src2]
-			} else {
-				register[dst] = register[src1] | register[src2]
-			}
-		}
+	ins := strings.Split(string(f), "\n")
+	for _, i := range ins {
+		parts := strings.Split(i, " -> ")
+		instructions[parts[1]] = strings.Split(parts[0], " ")
 	}
+	fmt.Println(calculateInstruction("a"))
+}
 
-	fmt.Print(register["a"])
+func calculateInstruction(wire string) uint16 {
+	if val, numeric := isNumeric(wire); numeric {
+		return val
+	}
+	if val, ok := register[wire]; ok {
+		return val
+	}
+	instruction := instructions[wire]
+	switch {
+	case len(instruction) == 1:
+		register[wire] = calculateInstruction(instruction[0])
+	case instruction[0] == "NOT":
+		register[wire] = ^calculateInstruction(instruction[1])
+	case instruction[1] == "AND":
+		register[wire] = calculateInstruction(instruction[0]) & calculateInstruction(instruction[2])
+	case instruction[1] == "OR":
+		register[wire] = calculateInstruction(instruction[0]) | calculateInstruction(instruction[2])
+	case instruction[1] == "LSHIFT":
+		register[wire] = calculateInstruction(instruction[0]) << calculateInstruction(instruction[2])
+	case instruction[1] == "RSHIFT":
+		register[wire] = calculateInstruction(instruction[0]) >> calculateInstruction(instruction[2])
+	}
+	return register[wire]
+}
 
+func isNumeric(s string) (uint16, bool) {
+	intString, err := strconv.Atoi(s)
+	if err != nil {
+		return 0, false
+	} else {
+		return uint16(intString), true
+	}
 }
 
 func sol2(f []byte) {
