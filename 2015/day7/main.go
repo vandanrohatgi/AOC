@@ -86,5 +86,13 @@ func isNumeric(s string) (uint16, bool) {
 }
 
 func sol2(f []byte) {
-
+	ins := strings.Split(string(f), "\n")
+	for _, i := range ins {
+		parts := strings.Split(i, " -> ")
+		instructions[parts[1]] = strings.Split(parts[0], " ")
+	}
+	tmp := calculateInstruction("a")
+	instructions["b"] = []string{strconv.Itoa(int(tmp))}
+	register = make(map[string]uint16)
+	fmt.Println(calculateInstruction("a"))
 }
