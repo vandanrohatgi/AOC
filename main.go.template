@@ -4,6 +4,7 @@ import (
 	"flag"
 	"log"
 	"os"
+    "bytes"
 )
 
 func main() {
@@ -27,7 +28,8 @@ func main() {
 			log.Fatal(err)
 		}
 	}
-
+    
+    f=bytes.TrimSpace(f)
 	if solution == 1 {
 		sol1(f)
 	} else {
