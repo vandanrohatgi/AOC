@@ -51,5 +51,12 @@ func sol1(f []byte) {
 }
 
 func sol2(f []byte) {
-
+	r := bytes.NewReader(f)
+	buf := bufio.NewScanner(r)
+	var sum int
+	for buf.Scan() {
+		tmp := strconv.Quote(buf.Text())
+		sum += len(tmp) - len(buf.Text())
+	}
+	fmt.Println(sum)
 }
