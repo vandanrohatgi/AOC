@@ -1,7 +1,6 @@
 package main
 
 import (
-	"bufio"
 	"bytes"
 	"flag"
 	"fmt"
@@ -9,7 +8,6 @@ import (
 	"math"
 	"os"
 	"strings"
-	"time"
 )
 
 func main() {
@@ -42,81 +40,51 @@ func main() {
 	}
 }
 
-type Graph struct {
-	Vertices map[string]Vertex
-}
-
-type Vertex struct {
-	Edges map[string]int
-}
-
-func (g *Graph) InitializeGraph() {
-	g.Vertices = make(map[string]Vertex)
-}
-
-func (g *Graph) AddVertex(src string) {
-	if _, ok := g.Vertices[src]; !ok {
-		g.Vertices[src] = Vertex{Edges: make(map[string]int)}
-	}
-}
-
-func (g *Graph) AddEdge(src, dst string, weight int) {
-	g.Vertices[src].Edges[dst] = weight
-}
-
-// findClosest find the closest node which hasn't been traversed
-func (v Vertex) findClosest(travelled map[string]int) string {
-	minDist := math.MaxInt32
-	var minKey string
-	for k, v := range v.Edges {
-		if _, found := travelled[k]; !found && v < minDist {
-			minDist = v
-			minKey = k
-		}
-	}
-	return minKey
-}
+var graph = make(map[string]map[string]int)
 
 func sol1(f []byte) {
-	r := bytes.NewReader(f)
-	buf := bufio.NewScanner(r)
-
+	input := strings.Split(string(f), "\n")
 	var src, dst string
-	var weight int
-	var inputGraph Graph
-	inputGraph.InitializeGraph()
+	var cost int
 
-	for buf.Scan() {
-		fmt.Fscanf(strings.NewReader(buf.Text()), "%s to %s = %d", &src, &dst, &weight)
-
-		inputGraph.AddVertex(src)
-		inputGraph.AddVertex(dst)
-
-		inputGraph.AddEdge(src, dst, weight)
-		inputGraph.AddEdge(dst, src, weight)
+	for _, i := range input {
+		fmt.Fscanf(strings.NewReader(i), "%s to %s = %d", &src, &dst, &cost)
+		if _, found := graph[src]; !found {
+			graph[src] = make(map[string]int)
+		}
+		if _, found := graph[dst]; !found {
+			graph[dst] = make(map[string]int)
+		}
+		graph[src][dst] = cost
+		graph[dst][src] = cost
+	}
+	var nodes []string
+	for k := range graph {
+		nodes = append(nodes, k)
 	}
 
-	fmt.Println(inputGraph.Vertices)
-	var travelled = make(map[string]int)
+	allCombinations := comb[string](nodes)
 
-	var startingPoint = "AlphaCentauri"
-	travelled[startingPoint] = 0
+}
 
-	for len(travelled) < len(inputGraph.Vertices) {
-		time.Sleep(1 * time.Second)
-		fmt.Println(travelled)
-		closest := inputGraph.Vertices[startingPoint].findClosest(travelled)
-		travelled[closest] = inputGraph.Vertices[startingPoint].Edges[closest]
-		startingPoint = closest
+func comb[T any](i []T) [][]T {
+	if len(i) == 1 {
+		return [][]T{i}
 	}
 
-	fmt.Println(travelled)
-	var plswork int
-	for _, v := range travelled {
-		plswork += v
+	var newCombs [][]T
+	for k := 0; k < len(i); k++ {
+		newI := make([]T, len(i))
+		copy(newI, i)
+		newI = append(newI[:k], newI[k+1:]...)
+
+		for _, jk := range comb(newI) {
+			jk = append([]T{i[k]}, jk...)
+			newCombs = append(newCombs, jk)
+		}
 	}
 
-	fmt.Println(plswork)
+	return newCombs
 }
 
 func sol2(f []byte) {
