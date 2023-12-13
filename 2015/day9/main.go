@@ -58,6 +58,7 @@ func sol1(f []byte) {
 		graph[src][dst] = cost
 		graph[dst][src] = cost
 	}
+
 	var nodes []string
 	for k := range graph {
 		nodes = append(nodes, k)
@@ -65,6 +66,18 @@ func sol1(f []byte) {
 
 	allCombinations := comb[string](nodes)
 
+	var minDist = math.MaxInt32
+	for _, i := range allCombinations {
+		var tmpDist int
+		for node := 0; node < len(graph)-1; node++ {
+			tmpDist += graph[i[node]][i[node+1]]
+		}
+		if tmpDist < minDist {
+			minDist = tmpDist
+		}
+	}
+
+	fmt.Print(minDist)
 }
 
 func comb[T any](i []T) [][]T {
@@ -88,5 +101,39 @@ func comb[T any](i []T) [][]T {
 }
 
 func sol2(f []byte) {
+	input := strings.Split(string(f), "\n")
+	var src, dst string
+	var cost int
 
+	for _, i := range input {
+		fmt.Fscanf(strings.NewReader(i), "%s to %s = %d", &src, &dst, &cost)
+		if _, found := graph[src]; !found {
+			graph[src] = make(map[string]int)
+		}
+		if _, found := graph[dst]; !found {
+			graph[dst] = make(map[string]int)
+		}
+		graph[src][dst] = cost
+		graph[dst][src] = cost
+	}
+
+	var nodes []string
+	for k := range graph {
+		nodes = append(nodes, k)
+	}
+
+	allCombinations := comb[string](nodes)
+
+	var maxDist = 0
+	for _, i := range allCombinations {
+		var tmpDist int
+		for node := 0; node < len(graph)-1; node++ {
+			tmpDist += graph[i[node]][i[node+1]]
+		}
+		if tmpDist > maxDist {
+			maxDist = tmpDist
+		}
+	}
+
+	fmt.Print(maxDist)
 }
