@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"log"
 	"os"
-	"strconv"
+	"strings"
 )
 
 func main() {
@@ -39,13 +39,9 @@ func main() {
 	}
 }
 
-var memo map[string]string
-
 func sol1(f []byte) {
 	input := string(f)
 	var output string
-
-	memo = make(map[string]string)
 
 	for i := 0; i < 40; i++ {
 		output = lookAndSay(input)
@@ -54,39 +50,25 @@ func sol1(f []byte) {
 	fmt.Println(len(output))
 }
 
-func getSequence(input string, iter int) string {
-	if len(input) == 1 {
-		return "1" + input
-	}
-	if val, ok := memo[input]; ok {
-		return val
-	}
-    getSequence(input[], iter int)
-}
-
 func lookAndSay(input string) string {
-	var output string
-	var current = input[0]
-	var count = 1
-	for i := 1; i < len(input); i++ {
-		if current == input[i] {
-			count += 1
+	var output strings.Builder
+	var count = 0
+	for i := 0; i < len(input); i++ {
+		if i == len(input)-1 || input[i] != input[i+1] {
+			output.WriteString(fmt.Sprintf("%d%s", count+1, string(input[i])))
+			count = 0
 		} else {
-			output = output + strconv.Itoa(count) + string(current)
-			count = 1
+			count += 1
 		}
-		current = input[i]
 	}
 
-	output = output + strconv.Itoa(count) + string(current) // for the last char(S) who didnt get their loops
-	return output
+	return output.String()
 }
 
-// add a dictionary to keep a record of previous already calculated sequences
-// since they will repeat.
 func sol2(f []byte) {
 	input := string(f)
 	var output string
+
 	for i := 0; i < 50; i++ {
 		output = lookAndSay(input)
 		input = output
