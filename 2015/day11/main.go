@@ -51,7 +51,7 @@ func (s *santaPass) getString() string {
 func (s *santaPass) incrementByOne(i int) {
 	if (*s)[i] < 122 && (*s)[i] >= 97 {
 		(*s)[i] += 1
-	} else if (*s)[i] == 'z' {
+	} else if (*s)[i] == 'z' && i != 0 {
 		(*s)[i] = 'a'
 		s.incrementByOne(i - 1)
 	} // i==0 no action in case we can't go any further left
@@ -60,18 +60,22 @@ func (s *santaPass) incrementByOne(i int) {
 func sol1(f []byte) {
 	currentPass := string(f)
 
+	currentPass = generateNextPass(currentPass)
+	fmt.Println(currentPass)
+}
+
+func generateNextPass(currentPass string) string {
 	var s santaPass
 	s.setPass(currentPass)
 	s.incrementByOne(len(currentPass) - 1)
+
 	currentPass = s.getString()
-	fmt.Println(currentPass)
-	for !hasTwoPairs(currentPass) && !notHaveBadLetters(currentPass) && !hasThreeLetters(currentPass) {
-		fmt.Println(currentPass)
+
+	for !hasTwoPairs(currentPass) || !notHaveBadLetters(currentPass) || !hasThreeLetters(currentPass) {
 		s.incrementByOne(len(currentPass) - 1)
 		currentPass = s.getString()
 	}
-
-	fmt.Println(currentPass)
+	return currentPass
 }
 
 func hasTwoPairs(s string) bool {
@@ -105,5 +109,8 @@ func hasThreeLetters(s string) bool {
 }
 
 func sol2(f []byte) {
-
+	currentPass := string(f)
+	currentPass = generateNextPass(currentPass)
+	currentPass = generateNextPass(currentPass)
+	fmt.Println(currentPass)
 }
