@@ -2,12 +2,11 @@ package main
 
 import (
 	"bytes"
+	"encoding/json"
 	"flag"
 	"fmt"
 	"log"
 	"os"
-	"regexp"
-	"strconv"
 )
 
 func main() {
@@ -40,18 +39,49 @@ func main() {
 	}
 }
 
-var number = regexp.MustCompile(`-?\d+`)
-
 func sol1(f []byte) {
-	matches := number.FindAll(f, -1)
-	var sum int
-	for _, i := range matches {
-		tmp, _ := strconv.Atoi(string(i))
-		sum += tmp
-	}
+	var m interface{}
+	json.Unmarshal(f, &m)
+	countNums(m)
 	fmt.Println(sum)
 }
 
-func sol2(f []byte) {
+var sum float64
 
+// I'm disgusted by the amount of times I have to write interface{}
+func countNums(m interface{}) {
+	if val, intOk := m.(float64); intOk {
+		sum += val
+		return
+	}
+
+	switch input := m.(type) {
+	case map[string]interface{}:
+		if hasRed(input) {
+			return
+		}
+		for _, v := range input {
+			countNums(v)
+		}
+	case []interface{}:
+		for _, i := range input {
+			countNums(i)
+		}
+	}
+}
+
+func hasRed(m map[string]interface{}) bool {
+	for _, v := range m {
+		if v == "red" {
+			return true
+		}
+	}
+	return false
+}
+
+func sol2(f []byte) {
+	var m interface{}
+	json.Unmarshal(f, &m)
+	countNums(m)
+	fmt.Println(sum)
 }
