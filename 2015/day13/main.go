@@ -111,4 +111,36 @@ func calcHappy(s []string) int {
 
 func sol2(f []byte) {
 
+	buf := bufio.NewScanner(bytes.NewReader(f))
+	var s1, s2, sign string
+	var unit int
+	for buf.Scan() {
+		fmt.Sscanf(strings.Trim(buf.Text(), "."), "%s would %s %d happiness units by sitting next to %s", &s1, &sign, &unit, &s2)
+		if _, ok := happiness[s1]; !ok {
+			happiness[s1] = make(map[string]int)
+			happiness[s1]["self"] = 0
+		}
+		if sign == "lose" {
+			unit *= -1
+		}
+		happiness[s1][s2] = unit
+	}
+
+	var family []string
+	happiness["self"] = make(map[string]int)
+	for i := range happiness {
+		family = append(family, i)
+		happiness["self"][i] = 0
+	}
+
+	allPerms := createPermutations(family)
+
+	var maxHappy int
+	for _, i := range allPerms {
+		tmp := calcHappy(i)
+		if tmp > maxHappy {
+			maxHappy = tmp
+		}
+	}
+	fmt.Println(maxHappy)
 }
