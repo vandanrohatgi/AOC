@@ -57,10 +57,72 @@ func sol1(f []byte) {
 		if TotalDist > bestDeerDist {
 			bestDeerDist = TotalDist
 		}
+		fmt.Println(TotalDist)
 	}
-	fmt.Println(bestDeerDist)
+	// fmt.Println(bestDeerDist)
+}
+
+const Totaltime = 2503
+
+type Deer struct {
+	speed         int
+	limit         int
+	rest          int
+	distTravelled int
+	points        int
+	runTime       int
+	restTime      int
+}
+
+func (d *Deer) increment() {
+	if d.runTime < d.limit {
+		d.distTravelled += d.speed
+		d.runTime += 1
+	} else if d.restTime < d.rest {
+		d.restTime += 1
+	} else {
+		d.runTime = 1
+		d.distTravelled += d.speed
+		d.restTime = 0
+	}
+}
+
+func (d *Deer) addPoint() {
+	d.points += 1
 }
 
 func sol2(f []byte) {
+	var speed, limit, rest int
+	var deerName string
+	var deers = make(map[string]*Deer)
 
+	for _, i := range strings.Split(string(f), "\n") {
+		_, err := fmt.Sscanf(i, "%s can fly %d km/s for %d seconds, but then must rest for %d seconds.", &deerName, &speed, &limit, &rest)
+		if err != nil {
+			panic(err)
+		}
+		deers[deerName] = &Deer{speed: speed, limit: limit, rest: rest, distTravelled: 0}
+	}
+
+	var currentBestDist int
+	for i := 0; i < Totaltime; i++ {
+		currentBestDist = 0
+		for _, j := range deers {
+			j.increment()
+			if currentBestDist < j.distTravelled {
+				currentBestDist = j.distTravelled
+			}
+		}
+
+		// becuase we give point to each deer who is tied
+		for _, j := range deers {
+			if j.distTravelled == currentBestDist {
+				j.addPoint()
+			}
+		}
+	}
+
+	for _, j := range deers {
+		fmt.Println(j.points)
+	}
 }
