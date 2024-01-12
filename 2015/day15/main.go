@@ -44,6 +44,10 @@ var chart = make(map[string][]int)
 const TEASPOONS = 100
 
 func calcScore(ing1, ing2, ing3, ing4 string, ing1cont, ing2cont, ing3cont, ing4cont int) int {
+	calories := chart[ing1][4]*ing1cont + chart[ing2][4]*ing2cont + chart[ing3][4]*ing3cont + chart[ing4][4]*ing4cont
+	if calories != 500 {
+		return 0
+	}
 	capa := max(0, chart[ing1][0]*ing1cont+chart[ing2][0]*ing2cont+chart[ing3][0]*ing3cont+chart[ing4][0]*ing4cont)
 	dura := max(0, chart[ing1][1]*ing1cont+chart[ing2][1]*ing2cont+chart[ing3][1]*ing3cont+chart[ing4][1]*ing4cont)
 	flav := max(0, chart[ing1][2]*ing1cont+chart[ing2][2]*ing2cont+chart[ing3][2]*ing3cont+chart[ing4][2]*ing4cont)
@@ -79,5 +83,28 @@ func sol1(f []byte) {
 }
 
 func sol2(f []byte) {
+	var ingredient string
+	var capacity, durability, flavor, texture, calories int
+	for _, i := range strings.Split(string(f), "\n") {
+		fmt.Sscanf(i, "%s capacity %d, durability %d, flavor %d, texture %d, calories %d", &ingredient, &capacity, &durability, &flavor, &texture, &calories)
+		ingredient = strings.Trim(ingredient, ":")
+		chart[ingredient] = []int{capacity, durability, flavor, texture, calories}
+	}
+	var maxScore int
+	for i := 0; i < TEASPOONS; i++ {
+		for j := 0; j < TEASPOONS; j++ {
+			for k := 0; k < TEASPOONS; k++ {
+				for l := 0; l < TEASPOONS; l++ {
+					if i+j+k+l > TEASPOONS {
+						continue
+					}
+					if score := calcScore("Sprinkles", "PeanutButter", "Frosting", "Sugar", i, j, k, l); score > maxScore {
+						maxScore = score
+					}
+				}
+			}
+		}
+	}
+	fmt.Println(maxScore)
 
 }
