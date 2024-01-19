@@ -71,9 +71,53 @@ func sol1(f []byte) {
 			break
 		}
 	}
-
 }
 
 func sol2(f []byte) {
+	gift, _ := os.ReadFile("gift.txt")
+	giftProps := make(map[string]int)
+	auntsList := make(map[int]map[string]int)
+	var tmpProp1, tmpProp2, tmpProp3 string
+	var aunt, tmpAmount1, tmpAmount2, tmpAmount3 int
+	for _, i := range strings.Split(strings.TrimSpace(string(gift)), "\n") {
+		fmt.Sscanf(i, "%s %d", &tmpProp1, &tmpAmount1)
+		giftProps[tmpProp1] = tmpAmount1
+	}
 
+	for _, i := range strings.Split(string(f), "\n") {
+		fmt.Sscanf(i, "Sue %d: %s %d, %s %d, %s %d", &aunt, &tmpProp1, &tmpAmount1, &tmpProp2, &tmpAmount2, &tmpProp3, &tmpAmount3)
+		auntsList[aunt] = make(map[string]int)
+		auntsList[aunt][tmpProp1] = tmpAmount1 // can probably make this better with a cutom bufio scanner
+		auntsList[aunt][tmpProp2] = tmpAmount2
+		auntsList[aunt][tmpProp3] = tmpAmount3
+	}
+
+	var count int
+	for auntNum, auntProps := range auntsList {
+		count = 0
+		for giftProp, giftPropAmount := range giftProps {
+			x, ok := auntProps[giftProp]
+			if !ok {
+				continue
+			}
+			switch giftProp {
+			case "cats:", "trees:":
+				if x > giftPropAmount {
+					count += 1
+				}
+			case "pomeranians:", "goldfish:":
+				if x < giftPropAmount {
+					count += 1
+				}
+			default:
+				if x == giftPropAmount {
+					count += 1
+				}
+			}
+		}
+		if count >= 3 {
+			fmt.Println(auntNum)
+			break
+		}
+	}
 }
