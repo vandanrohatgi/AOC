@@ -5,6 +5,7 @@ import (
 	"log"
 	"os"
     "bytes"
+    "strings"
 )
 
 func main() {
@@ -30,10 +31,11 @@ func main() {
 	}
     
     f=bytes.TrimSpace(f)
+    fs:=strings.split(string(f),"\n")
 	if solution == 1 {
-		sol1(f)
+		sol1(fs)
 	} else {
-		sol2(f)
+		sol2(fs)
 	}
 }
 
