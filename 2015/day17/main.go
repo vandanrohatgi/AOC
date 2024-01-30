@@ -4,11 +4,10 @@ import (
 	"flag"
 	"fmt"
 	"log"
+	"math"
 	"os"
 	"strconv"
 	"strings"
-
-	"github.com/vandanrohatgi/aoc/utility"
 )
 
 func main() {
@@ -53,19 +52,26 @@ func sum(input []int) int {
 	return s
 }
 
-func pickNum(perms [][]int) [][]int {
-	var result [][]int
-	for a := 0; a <= len(perms[0]); a++ {
-		for index, j := range perms {
-			if sum(j) == EGGNOG {
-				result = append(result, j)
-			}
-			perms[index] = j[:len(j)-1]
+func All[T any](set []T) (subsets [][]T) {
+	length := uint(len(set))
 
+	// Go through all possible combinations of objects
+	// from 1 (only first object in subset) to 2^length (all objects in subset)
+	for subsetBits := 1; subsetBits < (1 << length); subsetBits++ {
+		var subset []T
+
+		for object := uint(0); object < length; object++ {
+			// checks if object is contained in subset
+			// by checking if bit 'object' is set in subsetBits
+			if (subsetBits>>object)&1 == 1 {
+				// add object to subset
+				subset = append(subset, set[object])
+			}
 		}
-		fmt.Printf("\n------------------ %+v ----------\n", perms)
+		// add subset to subsets
+		subsets = append(subsets, subset)
 	}
-	return result
+	return subsets
 }
 
 func sol1(f []string) {
@@ -77,10 +83,40 @@ func sol1(f []string) {
 			panic(err)
 		}
 	}
-	perms := utility.Permutate(conts)
-	fmt.Println(pickNum(perms))
+	var count int
+	combs := All(conts)
+	for _, i := range combs {
+		if sum(i) == EGGNOG {
+			count += 1
+		}
+	}
+	fmt.Println(count)
 }
 
 func sol2(f []string) {
+	var conts = make([]int, len(f))
+	var err error
+	for i := range f {
+		conts[i], err = strconv.Atoi(f[i])
+		if err != nil {
+			panic(err)
+		}
+	}
+	var count int
+	var mini = math.MaxInt
+	combs := All(conts)
 
+	for _, i := range combs {
+		if sum(i) != EGGNOG {
+			continue
+		}
+		if len(i) < mini {
+			mini = len(i)
+			count = 1
+		} else if len(i) == mini {
+			count += 1
+		}
+	}
+
+	fmt.Println(count)
 }
