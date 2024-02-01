@@ -42,7 +42,7 @@ func main() {
 	}
 }
 
-const EGGNOG = 25
+const EGGNOG = 150
 
 func sum(input []int) int {
 	var s int
@@ -52,13 +52,13 @@ func sum(input []int) int {
 	return s
 }
 
-func All[T any](set []T) (subsets [][]T) {
+func All(set []int) (subsets [][]int) {
 	length := uint(len(set))
 
 	// Go through all possible combinations of objects
 	// from 1 (only first object in subset) to 2^length (all objects in subset)
 	for subsetBits := 1; subsetBits < (1 << length); subsetBits++ {
-		var subset []T
+		var subset []int
 
 		for object := uint(0); object < length; object++ {
 			// checks if object is contained in subset
@@ -69,7 +69,9 @@ func All[T any](set []T) (subsets [][]T) {
 			}
 		}
 		// add subset to subsets
-		subsets = append(subsets, subset)
+		if sum(subset) == EGGNOG {
+			subsets = append(subsets, subset)
+		}
 	}
 	return subsets
 }
@@ -107,9 +109,6 @@ func sol2(f []string) {
 	combs := All(conts)
 
 	for _, i := range combs {
-		if sum(i) != EGGNOG {
-			continue
-		}
 		if len(i) < mini {
 			mini = len(i)
 			count = 1
